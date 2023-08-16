@@ -1,0 +1,1 @@
+update personal_best_apps_and_games_of_2019 set rating = 0 where rating is null;

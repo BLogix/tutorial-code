@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>React Your Way</title>
+
+        <!-- react 16.8.6 -->
+        <script src="https://unpkg.com/react@16.8.6/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@16.8.6/umd/react-dom.development.js"></script>
+
+        <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.min.js"></script>
+
+        <!-- 
+            Once development work is done then use the minified production libs
+        -->
+        <!--script src="http://unpkg.com/react@16.8.6/umd/react.production.min.js"></script>
+        <script src="http://unpkg.com/react-dom@16.8.6/umd/react-dom.production.min.js"></script-->
+
+        <!-- Babel 6.21.1-->
+        <!-- 
+            https://babeljs.io/en/setup/#usage
+            - it explains why we need to use the <script type="text/babel"> tag
+        -->
+        <script src='https://unpkg.com/babel-standalone@6.26.0/babel.min.js'></script>
+
+        <!-- Any other libs can be imported using the script tag -->
+
+        <!-- Stylesheets -->
+        <link rel='stylesheet' href='style/index.css' type='text/css'>
+    </head>
+    <body>
+        <!-- ----------------------------------------------------------main container -->
+        <div id="root"></div>
+
+        <!-- Star -->
+        <script type="text/babel">
+            const Star = (props) => (
+                <div className={'star-wrapper'}>
+                    {props.grayscale
+                        ?
+                            <img className="pointer filter-grayscale" src={'./resource/yellow-star.png'} alt={'star'}/>
+                        :
+                            <img className="pointer" src={'./resource/yellow-star.png'} alt={'star'}/>
+                    }
+                </div>
+            )
+        </script>
+
+        <!-- survey -->
+        <script type='text/babel'>
+            class Survey extends React.Component{
+                constructor(){
+                    super();
+            
+                    this.state = {
+                        stars: [1,2,3,4,5],
+                        rating: [],
+                        clickedStar: 0,
+                        order: '',
+                        foodTypes: ['taco', 'burger', 'panini', 'sausage'],
+                        meats: ['chicken', 'beef', 'charizo', 'turkey'],
+                        sides: ['french fries', 'tots', 'chips', 'a salad'],
+                        orderSizes: ['small', 'medium', 'large'],
+                        orderNumber: null
+                    };
+
+                    this.handleChange = this.handleChange.bind(this);
+                    this.handleSubmit = this.handleSubmit.bind(this);
+                }
+            
+                handleChange=(event)=>this.setState({clickedStar: event.currentTarget.id-1});
+            
+                handleSubmit(event){
+                    event.preventDefault();
+                    const {clickedStar} = this.state;
+
+                    if (clickedStar + 1 > 1 && clickedStar + 1 < 5){
+                        alert(`Woot! ${clickedStar+1} stars!`);
+                    } else if(clickedStar + 1 === 5){
+                        alert(`Oh snap!!! We got ${clickedStar+1} stars!`);
+                    } else {
+                        alert(`Ohhh... ${clickedStar+1} star`);
+                    }
+                }
+
+                decideGrayscale=(index)=>(index <= this.state.clickedStar);
+
+                generateOrderNumber = (explict) => {
+                    const num = explict === undefined ? 10 : explict;
+
+                    return Math.floor((Math.random() * num) + 1);
+                };
+
+                pullOrder = ({foodTypes, meats, sides, orderSizes}) => {
+                    if (foodTypes && meats && sides && orderSizes){
+                        const foodIdx = this.generateOrderNumber(foodTypes.length-1);
+                        const meatIdx = this.generateOrderNumber(meats.length-1);
+                        const sideIdx = this.generateOrderNumber(sides.length-1);
+                        const orderIdx = this.generateOrderNumber(orderSizes.length-1);
+
+                        const foodType = foodTypes[foodIdx];
+                        const meatType = meats[meatIdx];
+                        const sideType = sides[sideIdx];
+                        const orderType = orderSizes[orderIdx];
+
+                        return {type: foodType, meat: meatType, side: sideType, size: orderType}
+                    }
+                };
+
+                componentDidMount(){
+                    /*
+                     * If we knew where our service lives we could make the http requests here to retrieve the data we wanted.
+                     * The requests in the react-spring-boot portion of this project could be mimiced here to produce the 
+                     * same result. 
+                     */
+                    this.setState({
+                        orderNumber: this.generateOrderNumber()
+                    })
+                }
+            
+                render(){
+                    const {stars, orderNumber} = this.state;
+                    const order = this.pullOrder(this.state);
+                    const sentence = order.size !== undefined ?  `${order.size} ${order.meat} ${order.type} with ${order.side}` : '';
+
+                    return(
+                        <div className={'wrapper'}>
+                            <h1>Thank You!</h1>
+                            <h4>Please Rate Our Food</h4>
+                            <p>order no: {orderNumber}</p>
+
+                            <section className={'form-center'}>
+                                <form onSubmit={this.handleSubmit}>
+                                    {order.size !== undefined
+                                    ?
+                                        <section>
+                                            <p>Thank you for your order of <br/> 1 {sentence} <br/><br/> How many stars do you give us?</p>
+                                        </section>
+                                    :
+                                        <section>
+                                            <p>Loading order</p>
+                                        </section>
+                                    }
+
+                                    <section className={'star-box'}>
+                                        {stars.map((star, index) =>
+                                            <section key={index} id={`${star}`} onClick={this.handleChange}>
+                                                <Star grayscale={!this.decideGrayscale(index)}/>
+                                            </section>
+                                        )}
+                                    </section>
+
+                                    <section className={'submit-wrapper'}>
+                                        <input className={'submit-btn'} type='submit' value={'Let Us Know'}/>
+                                    </section>
+                                </form>
+                            </section>
+                        </div>
+                    )
+                }
+            }
+        </script>
+
+        <!-- router -->
+        <script type='text/babel'>
+            const {BrowserRouter, Route} = ReactRouterDOM;
+
+            const App = () => (
+                <BrowserRouter>
+                    <Route path={'/'} component={Survey}/>
+                </BrowserRouter>
+            );
+        </script>
+
+        <!-- index.js -->
+        <script type='text/babel'>
+            ReactDOM.render(
+                <App/>,
+                document.getElementById('root')
+            )
+        </script>
+    </body>
+</html>

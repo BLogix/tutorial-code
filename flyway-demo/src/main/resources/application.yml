@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:<Database File Location>/flyway-demo # - location of H2 file type database
+    driver-class-name: org.h2.Driver
+    username: user
+    password: pass
+  h2:
+    console.enabled: true
+  flyway:
+    baseline-on-migrate: true
+    baseline-description: baseline
+    baseline-version: 0
+    table: example_schema_version
+    locations: ['classpath:db/migration'] # - Manual setting for sql migrations. This is also the default path for sql migrations
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none # - in order for flyway to work with H2 we have to disable hibernate's ddl generation
